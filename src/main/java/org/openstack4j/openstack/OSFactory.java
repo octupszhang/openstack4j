@@ -1,13 +1,17 @@
 package org.openstack4j.openstack;
 
+import org.openstack4j.model.identity.Token;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.AuthenticationException;
 import org.openstack4j.core.transport.HttpMethod;
 import org.openstack4j.core.transport.HttpRequest;
+import org.openstack4j.core.transport.HttpResponse;
 import org.openstack4j.core.transport.internal.HttpExecutor;
 import org.openstack4j.model.identity.Access;
 import org.openstack4j.openstack.identity.domain.Credentials;
 import org.openstack4j.openstack.identity.domain.KeystoneAccess;
+import org.openstack4j.openstack.identity.domain.v3.KeystoneAccessV3;
+import org.openstack4j.openstack.identity.domain.v3.KeystoneTokenV3;
 import org.openstack4j.openstack.internal.OSClientSession;
 
 /**
@@ -23,6 +27,8 @@ public class OSFactory {
 		String tenantName;
 		String password;
 		String tenantId;
+		String domainName;
+		String domainId;
 		boolean useNonStrictSSL;
 		
 		private OSFactory() { }
@@ -85,6 +91,17 @@ public class OSFactory {
 			return this;
 		}
 		
+		public OSFactory domainId(String domainId) {
+			this.domainId = domainId;
+			return this;
+		}
+		
+		public OSFactory domainName(String domainName) {
+			this.domainName = domainName;
+			return this;
+		}
+		
+		
 		/**
 		 * In some private environments self signed certificates are used.  If you are using HTTPS and using
 		 * self-signed cerificates then set this to true.  Otherwise the default strict hostname and properly
@@ -109,6 +126,16 @@ public class OSFactory {
 			HttpRequest<KeystoneAccess> request = HttpRequest.builder(KeystoneAccess.class).endpoint(endpoint).method(HttpMethod.POST).path("/tokens").entity(credentials).build();
 			KeystoneAccess access = HttpExecutor.create().execute(request, useNonStrictSSL).getEntity(KeystoneAccess.class);
 			return OSClientSession.createSession(access.applyContext(endpoint, credentials), useNonStrictSSL);
+		}
+		
+		public OSClient  authenticateV3() throws AuthenticationException{
+			org.openstack4j.openstack.identity.domain.v3.Credentials credentials = new org.openstack4j.openstack.identity.domain.v3.Credentials(user, password, domainName, domainId);
+			HttpRequest<KeystoneAccessV3> request = HttpRequest.builder(KeystoneAccessV3.class).endpoint(endpoint).method(HttpMethod.POST).path("/auth/tokens").entity(credentials).build();
+			HttpResponse response=HttpExecutor.create().execute(request, useNonStrictSSL);
+			KeystoneAccessV3 access = response.getEntity(KeystoneAccessV3.class);
+			String tokenid=response.header("X-Subject-Token");
+			Token token=new KeystoneTokenV3(tokenid,access.getExpires_at());
+			return OSClientSession.createSession(access.applyContext(endpoint, credentials,token), useNonStrictSSL);
 		}
 		/**
 		 * Attempts to connect, authenticated ,but not create session,just return whether credentials and tenant right

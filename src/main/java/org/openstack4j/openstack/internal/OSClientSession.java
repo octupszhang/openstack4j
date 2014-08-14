@@ -19,7 +19,6 @@ import org.openstack4j.model.identity.Access;
 import org.openstack4j.model.identity.Access.Service;
 import org.openstack4j.model.identity.Endpoint;
 import org.openstack4j.model.identity.Token;
-import org.openstack4j.openstack.identity.domain.KeystoneAccess;
 import org.openstack4j.openstack.identity.functions.ServiceToServiceType;
 
 import com.google.common.collect.Iterables;
@@ -37,23 +36,23 @@ public class OSClientSession implements OSClient, EndpointTokenProvider {
 	private static final ThreadLocal<OSClientSession> sessions = new ThreadLocal<OSClientSession>();
 	
 	Map<ServiceType, Endpoint> endpoints = Maps.newHashMap();
-	KeystoneAccess access;
+	Access access;
 	Set<ServiceType> supports;
 	String publicHostIP;
 	boolean useNonStrictSSL;
 	
-	private OSClientSession(KeystoneAccess access, String endpoint, boolean useNonStrictSSL)
+	private OSClientSession(Access access, String endpoint, boolean useNonStrictSSL)
 	{
 		this.access = access;
 		this.useNonStrictSSL = useNonStrictSSL;
 		sessions.set(this);
 	}
 	
-	public static OSClientSession createSession(KeystoneAccess access) {
+	public static OSClientSession createSession(Access access) {
 		return new OSClientSession(access, access.getEndpoint(), Boolean.FALSE);
 	}
 	
-	public static OSClientSession createSession(KeystoneAccess access, boolean useNonStrictSSL) {
+	public static OSClientSession createSession(Access access, boolean useNonStrictSSL) {
 		return new OSClientSession(access, access.getEndpoint(), useNonStrictSSL);
 	}
 	

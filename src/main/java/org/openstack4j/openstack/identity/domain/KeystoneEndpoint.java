@@ -26,7 +26,10 @@ public class KeystoneEndpoint implements Endpoint {
 
 	private String type;
 	private String id;
-  private String name;
+	private String name;
+	private URI url;
+	@JsonProperty(value="interface")
+	private String interfacetype;
 	private String region;
 	private URI publicURL;
 	private URI internalURL;
@@ -67,6 +70,9 @@ public class KeystoneEndpoint implements Endpoint {
 	 * @return the admin URL for this endpoint, or null when the endpoint is part of the Access ServiceCatalog
 	 */
 	public URI getAdminURL() {
+		if (adminURL == null && interfacetype.equalsIgnoreCase("admin")) {
+			return url;
+		}
 		return adminURL;
 	}
 
@@ -74,6 +80,9 @@ public class KeystoneEndpoint implements Endpoint {
 	 * @return the public URL for this endpoint
 	 */
 	public URI getPublicURL() {
+		if (publicURL == null && interfacetype.equalsIgnoreCase("public")) {
+			return url;
+		}
 		return publicURL;
 	}
 	
@@ -81,6 +90,9 @@ public class KeystoneEndpoint implements Endpoint {
 	 * @return the internal URL for this endpoint
 	 */
 	public URI getInternalURL() {
+		if (internalURL == null && interfacetype.equalsIgnoreCase("internal")) {
+			return url;
+		}
 		return internalURL;
 	}
 	
@@ -119,7 +131,15 @@ public class KeystoneEndpoint implements Endpoint {
 		return versionList;
 	}
 	
-	 @Override
+	 public URI getUrl() {
+		return url;
+	}
+
+	public String getInetrfacetype() {
+		return interfacetype;
+	}
+
+	@Override
    public int hashCode() {
       return Objects.hashCode(id, versionId, region, publicURL, internalURL, adminURL, versionInfo, versionList,
             tenantId, type);

@@ -27,6 +27,11 @@ public interface Access extends ModelEntity {
 	 * @return details about the current user
 	 */
 	UserDetails getUser();
+
+	/**
+	 * @return the endpoint
+	 */
+	String getEndpoint();
 	
 	public interface UserDetails
 	{
@@ -55,4 +60,6 @@ public interface Access extends ModelEntity {
 
 		List<? extends Link> getEndpointsLinks();
 	}
+
+
 }
