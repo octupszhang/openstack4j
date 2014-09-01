@@ -6,6 +6,7 @@ public enum ServiceType {
 	COMPUTE("nova"),
 	IMAGE("glance"),
 	BLOCK_STORAGE("cinder"),
+	VOLUME("cinder"),
 	NETWORK("neutron"),
 	EC2("ec2"),
 	TELEMETRY("ceilometer"),

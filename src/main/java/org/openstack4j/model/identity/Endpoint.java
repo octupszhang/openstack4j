@@ -67,5 +67,7 @@ public interface Endpoint extends ModelEntity, Buildable<EndpointBuilder> {
 	 * @return the version list when endpoint is listed as part of Access Service Catalog, otherwise null
 	 */
 	URI getVersionList();
+
+	String getInterfacetype();
 	
 }

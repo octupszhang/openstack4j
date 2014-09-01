@@ -2,6 +2,7 @@ package org.openstack4j.openstack.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -138,7 +139,9 @@ public class OSClientSession implements OSClient, EndpointTokenProvider {
 		{
 			return getEndpointURL(endpoints.get(service));
 		}
-		
+		if(service.equals(ServiceType.BLOCK_STORAGE)){
+			service=ServiceType.VOLUME;
+		}
 		for (Service sc : access.getServiceCatalog()) {
 			if (service.getServiceName().equals(sc.getName()) || service.name().toLowerCase().equals(sc.getType()))
 			{
@@ -147,8 +150,15 @@ public class OSClientSession implements OSClient, EndpointTokenProvider {
 					sc.getEndpoints().get(0).toBuilder().type(sc.getServiceType().name());
 					endpoints.put(service, sc.getEndpoints().get(0));
 				}
-				else
-					endpoints.put(service, sc.getEndpoints().get(0));
+				
+				List<? extends Endpoint> endpointslist = sc.getEndpoints();
+				for (int i = 0; i < endpointslist.size(); i++) {
+					Endpoint endpoint = endpointslist.get(i);
+					if (endpoint.getPublicURL() != null || endpoint.getInterfacetype().equalsIgnoreCase("public")) {
+						endpoints.put(service,  endpoint);
+						return getEndpointURL(endpoint);
+					}
+				}
 				return getEndpointURL(sc.getEndpoints().get(0));
 			}
 		}

@@ -86,6 +86,10 @@ public class KeystoneEndpoint implements Endpoint {
 		return publicURL;
 	}
 	
+	public String getInterfacetype() {
+		return interfacetype;
+	}
+
 	/**
 	 * @return the internal URL for this endpoint
 	 */
@@ -142,7 +146,7 @@ public class KeystoneEndpoint implements Endpoint {
 	@Override
    public int hashCode() {
       return Objects.hashCode(id, versionId, region, publicURL, internalURL, adminURL, versionInfo, versionList,
-            tenantId, type);
+            tenantId, type, interfacetype);
    }
 	 
    @Override
@@ -156,7 +160,7 @@ public class KeystoneEndpoint implements Endpoint {
             && Objects.equal(this.region, that.region) && Objects.equal(this.publicURL, that.publicURL)
             && Objects.equal(this.internalURL, that.internalURL) && Objects.equal(this.adminURL, that.adminURL)
             && Objects.equal(this.versionInfo, that.versionInfo) && Objects.equal(this.versionList, that.versionList)
-            && Objects.equal(this.tenantId, that.tenantId) && Objects.equal(this.type, that.type);
+            && Objects.equal(this.tenantId, that.tenantId) && Objects.equal(this.type, that.type) && Objects.equal(this.interfacetype, that.interfacetype);
    }
 	
 	public String toString() {
@@ -164,7 +168,7 @@ public class KeystoneEndpoint implements Endpoint {
 				   .add("id", id).add("name", name).add("type", type)
 				   .add("region", region).add("publicURL", publicURL)
 				   .add("internalURL", internalURL).add("adminURL", adminURL)
-				   .add("versionId", versionId).add("versionInfo", versionInfo).add("versionList", versionList)
+				   .add("versionId", versionId).add("versionInfo", versionInfo).add("versionList", versionList).add("interfacetype", interfacetype)
 				   .toString();
 	}
 	
