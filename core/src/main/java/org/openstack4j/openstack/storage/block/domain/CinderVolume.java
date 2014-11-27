@@ -51,12 +51,17 @@ public class CinderVolume implements Volume {
 	private Boolean bootable;
 	@JsonProperty("attachments")
 	private List<CinderVolumeAttachment> attachments;
+
 	@JsonProperty("image_id")
 	private String imageId;
 	@JsonProperty("volume_image_metadata")
 	private Map<String, Object> imageMetadata;
 	@JsonProperty("os-vol-mig-status-attr:migstat")
 	private MigrationStatus migrateStatus;
+	@JsonProperty("os-vol-host-attr:host")
+	private String hostService;
+	@JsonProperty("lvm_instance_id")
+	private String lvmInstanceId;
 
 	/**
 	 * {@inheritDoc}
@@ -157,16 +162,26 @@ public class CinderVolume implements Volume {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public String getHostService() {
+		return hostService;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getImageRef() {
 	    if (imageRef != null)
 	        return imageRef;
-
 	    // Depending on whether this is a Listing or a direct Get the information is different so we are smart 
 	    // about returning the proper imageId if applicable
 	    if (imageId == null && imageMetadata != null && imageMetadata.containsKey("image_id"))
-	        imageId = String.valueOf(imageMetadata.get("image_id"));
-	    
+	        imageId = String.valueOf(imageMetadata.get("image_id"));   
 	    return imageId;
+	}
+
+	public String getLvmInstanceId() {
+		return lvmInstanceId;
 	}
 
 	/**
@@ -283,6 +298,12 @@ public class CinderVolume implements Volume {
 		@Override
 		public VolumeBuilder metadata(Map<String, String> metadata) {
 			m.metadata = metadata;
+			return this;
+		}
+		
+		@Override
+		public VolumeBuilder lvmInstanceId(String lvmInstanceId) {
+			m.lvmInstanceId = lvmInstanceId;
 			return this;
 		}
 		

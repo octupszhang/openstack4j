@@ -146,4 +146,8 @@ public interface Volume extends ModelEntity, Buildable<VolumeBuilder> {
 	 */
 	MigrationStatus getMigrateStatus();
 
+	String getLvmInstanceId();
+
+	String getHostService();
+	
 }
