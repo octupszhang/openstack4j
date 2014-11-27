@@ -83,4 +83,6 @@ public interface VolumeBuilder extends Builder<VolumeBuilder, Volume> {
 	 * @return VolumeBuilder
 	 */
 	VolumeBuilder metadata(Map<String, String> metadata);
+
+	VolumeBuilder lvmInstanceId(String lvmInstanceId);
 }

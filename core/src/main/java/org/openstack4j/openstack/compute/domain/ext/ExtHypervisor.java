@@ -7,10 +7,12 @@ import org.openstack4j.model.compute.ext.Hypervisor;
 import org.openstack4j.openstack.common.ListResult;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.google.common.base.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class ExtHypervisor implements Hypervisor {
 
     private static final long serialVersionUID = 1L;
@@ -50,7 +52,7 @@ public class ExtHypervisor implements Hypervisor {
     private HypervisorService service;
 
     @JsonProperty("cpu_info")
-    private HypervisorCPUInfo cpuInfo;
+    private Object cpuInfo;
 
     @Override
     public String getId() {
@@ -140,7 +142,10 @@ public class ExtHypervisor implements Hypervisor {
     
     @Override
     public CPUInfo getCPUInfo() {
-        return cpuInfo;
+    	if (cpuInfo instanceof CPUInfo) {
+    		 return (CPUInfo)cpuInfo;
+    	}
+        return null;
     }
 
     @Override
