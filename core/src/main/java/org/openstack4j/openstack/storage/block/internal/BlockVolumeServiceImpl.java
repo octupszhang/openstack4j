@@ -119,4 +119,12 @@ public class BlockVolumeServiceImpl extends BaseBlockStorageServices implements 
         return Apis.get(BlockVolumeTransferService.class);
     }
 
+	@Override
+	public ActionResponse migrate(String volumeId, String hostService, boolean forceHostCopy) {
+		CinderVolumeMigration migration = new CinderVolumeMigration(hostService, forceHostCopy);
+		return post(ActionResponse.class, uri("/volumes/%s/action", volumeId))
+				.entity(migration)
+				.execute();
+	}
+
 }

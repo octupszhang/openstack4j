@@ -145,4 +145,5 @@ public interface Volume extends ModelEntity, Buildable<VolumeBuilder> {
 	 * @return the status of volume migrate status, default null
 	 */
 	MigrationStatus getMigrateStatus();
+
 }
