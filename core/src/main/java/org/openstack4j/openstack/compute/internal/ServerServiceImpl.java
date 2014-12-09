@@ -21,6 +21,7 @@ import org.openstack4j.model.compute.VNCConsole.Type;
 import org.openstack4j.model.compute.VolumeAttachment;
 import org.openstack4j.model.compute.actions.BackupOptions;
 import org.openstack4j.model.compute.actions.LiveMigrateOptions;
+import org.openstack4j.model.compute.actions.MigrateOptions;
 import org.openstack4j.model.compute.actions.RebuildOptions;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
 import org.openstack4j.openstack.common.Metadata;
@@ -41,6 +42,7 @@ import org.openstack4j.openstack.compute.domain.actions.BasicActions.Resize;
 import org.openstack4j.openstack.compute.domain.actions.BasicActions.RevertResize;
 import org.openstack4j.openstack.compute.domain.actions.CreateSnapshotAction;
 import org.openstack4j.openstack.compute.domain.actions.LiveMigrationAction;
+import org.openstack4j.openstack.compute.domain.actions.MigrationAction;
 import org.openstack4j.openstack.compute.domain.actions.RebuildAction;
 import org.openstack4j.openstack.compute.domain.actions.SecurityGroupActions;
 import org.openstack4j.openstack.compute.domain.actions.ServerAction;
@@ -305,9 +307,14 @@ public class ServerServiceImpl extends BaseComputeServices implements ServerServ
      * {@inheritDoc}
      */
     @Override
-    public ActionResponse migrateServer(String serverId) {
+    public ActionResponse migrateServer(String serverId, MigrateOptions options) {
         checkNotNull(serverId);
-        return invokeAction(serverId, BasicActions.instanceFor(Migrate.class));
+        if (options == null) {
+            return invokeAction(serverId, BasicActions.instanceFor(Migrate.class));
+        } else {
+            MigrationAction action = MigrationAction.create(options);
+            return invokeAction(serverId, action);
+        }
     }
 
     /**

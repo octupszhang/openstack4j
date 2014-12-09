@@ -16,6 +16,7 @@ import org.openstack4j.model.compute.VNCConsole.Type;
 import org.openstack4j.model.compute.VolumeAttachment;
 import org.openstack4j.model.compute.actions.BackupOptions;
 import org.openstack4j.model.compute.actions.LiveMigrateOptions;
+import org.openstack4j.model.compute.actions.MigrateOptions;
 import org.openstack4j.model.compute.actions.RebuildOptions;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
 
@@ -239,9 +240,10 @@ public interface ServerService {
      * will be automatically confirmed after 24 hours.
      * 
      * @param serverId the server identifier
+     * @param options migration options
      * @return the action response
      */
-    ActionResponse migrateServer(String serverId);
+    ActionResponse migrateServer(String serverId, MigrateOptions options);
     
     /**
      * Live-migrates a server identified with {@code serverId} to a new host without rebooting
