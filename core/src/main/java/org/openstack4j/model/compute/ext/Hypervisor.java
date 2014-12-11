@@ -135,7 +135,21 @@ public interface Hypervisor extends ModelEntity {
      * @return CPUInfo
      */
     CPUInfo getCPUInfo();
-	
+
+	/**
+     * Gets the total vg size.
+     *
+     * @return vgTotal
+     */
+    double getVgTotal();
+
+	/**
+     * Gets the used vg size.
+     *
+     * @return vgUsed
+     */
+    double getVgUsed();
+
 	/**
 	 * The Hypervisor Services Detail
 	 */
@@ -204,4 +218,5 @@ public interface Hypervisor extends ModelEntity {
 	       */
 	      int getSockets();
 	    }
+
 }
