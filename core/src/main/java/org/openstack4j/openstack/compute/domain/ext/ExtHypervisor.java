@@ -54,6 +54,10 @@ public class ExtHypervisor implements Hypervisor {
     @JsonProperty("cpu_info")
     private Object cpuInfo;
 
+    @JsonProperty("cinder_vgs_total")
+    private double vgTotal;
+    @JsonProperty("cinder_vgs_used")
+    private double vgUsed;
     @Override
     public String getId() {
         return id;
@@ -148,7 +152,18 @@ public class ExtHypervisor implements Hypervisor {
         return null;
     }
 
+
     @Override
+    public double getVgTotal() {
+		return vgTotal;
+	}
+
+    @Override
+	public double getVgUsed() {
+		return vgUsed;
+	}
+
+	@Override
     public String toString() {
         return Objects.toStringHelper(this).omitNullValues()
                 .add("id", id).add("hypervisor_hostname", hypervisorHostname).add("version", version).add("type", type)
@@ -157,6 +172,8 @@ public class ExtHypervisor implements Hypervisor {
                 .add("localMemory", localMemory).add("localMemoryUsed", localMemoryUsed).add("currentWorkload",currentWorkload)
                 .add("leastDiskAvail", leastDiskAvailable).add("running_vms", runningVM).add("service", service)
                 .add("cpuInfo", cpuInfo)
+                .add("vgUsed", vgUsed)
+                .add("vgTotal", vgTotal)
                 .toString();
     }
 
