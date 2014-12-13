@@ -97,4 +97,14 @@ public interface BlockVolumeService extends RestService {
 	 */
 	BlockVolumeTransferService transfer();
 
+	 * OpenStack allows user delete a volume which is in any status such as CREATING or ATTACHING.
+	 * It's dangerous but useful. It's not 100% success.
+	 * 
+	 * @param volumeId the volume id
+	 * @param name the name to update (null indicates no name update)
+	 * @param description the description to update (null indicates no description update)
+	 * @return the action response
+	 */
+	ActionResponse forceDelete(String volumeId);
+
 }

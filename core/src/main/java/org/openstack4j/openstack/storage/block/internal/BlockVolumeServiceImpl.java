@@ -127,4 +127,12 @@ public class BlockVolumeServiceImpl extends BaseBlockStorageServices implements 
 				.execute();
 	}
 
+	@Override
+	public ActionResponse forceDelete(String volumeId) {
+		checkNotNull(volumeId);
+		return post(ActionResponse.class, uri("/volumes/%s/action", volumeId))
+    		    .entity(new ForceDeleteAction())
+    		    .execute();
+	}
+
 }
