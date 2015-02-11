@@ -119,10 +119,6 @@ public class ComputeServiceImpl extends BaseComputeServices implements ComputeSe
 		 return Apis.get(ServerGroupService.class);
 	}
 
-    @Override
-    public FloatingIPDNSService floatingIPDNS() {
-        return Apis.get(FloatingIPDNSService.class);
-    }
 
 	@Override
 	public HostAggregateService hostAggregates() {
