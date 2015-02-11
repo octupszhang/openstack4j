@@ -185,10 +185,6 @@ public class DefaultAPIProvider implements APIProvider {
 		bind(ServerGroupService.class, ServerGroupServiceImpl.class);
 		bind(ObjectStorageObjectService.class, ObjectStorageObjectServiceImpl.class);
 		bind(NetQuotaService.class, NetQuotaServiceImpl.class);
-		bind(InterfaceService.class, InterfaceServiceImpl.class);
-		bind(FloatingIPDNSService.class, FloatingIPDNSServiceImpl.class);
-		bind(FloatingIPDNSDomainService.class, FloatingIPDNSDomainServiceImpl.class);
-		bind(FloatingIPDNSEntryService.class, FloatingIPDNSEntryServiceImpl.class);
 		bind(HostAggregateService.class,HostAggregateServiceImpl.class);
 		bind(MemberService.class,MemberServiceImpl.class);
 		bind(VipService.class,VipServiceImpl.class);
