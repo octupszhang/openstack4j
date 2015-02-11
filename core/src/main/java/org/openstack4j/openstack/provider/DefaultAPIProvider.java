@@ -8,6 +8,7 @@ import org.openstack4j.api.compute.ComputeImageService;
 import org.openstack4j.api.compute.ComputeSecurityGroupService;
 import org.openstack4j.api.compute.ComputeService;
 import org.openstack4j.api.compute.FlavorService;
+import org.openstack4j.api.compute.HostAggregateService;
 import org.openstack4j.api.compute.KeypairService;
 import org.openstack4j.api.compute.QuotaSetService;
 import org.openstack4j.api.compute.ServerGroupService;
@@ -51,6 +52,7 @@ import org.openstack4j.openstack.compute.internal.ComputeImageServiceImpl;
 import org.openstack4j.openstack.compute.internal.ComputeSecurityGroupServiceImpl;
 import org.openstack4j.openstack.compute.internal.ComputeServiceImpl;
 import org.openstack4j.openstack.compute.internal.FlavorServiceImpl;
+import org.openstack4j.openstack.compute.internal.HostAggregateServiceImpl;
 import org.openstack4j.openstack.compute.internal.KeypairServiceImpl;
 import org.openstack4j.openstack.compute.internal.QuotaSetServiceImpl;
 import org.openstack4j.openstack.compute.internal.ServerGroupServiceImpl;
@@ -148,6 +150,11 @@ public class DefaultAPIProvider implements APIProvider {
 		bind(ServerGroupService.class, ServerGroupServiceImpl.class);
 		bind(ObjectStorageObjectService.class, ObjectStorageObjectServiceImpl.class);
 		bind(NetQuotaService.class, NetQuotaServiceImpl.class);
+		bind(InterfaceService.class, InterfaceServiceImpl.class);
+		bind(FloatingIPDNSService.class, FloatingIPDNSServiceImpl.class);
+		bind(FloatingIPDNSDomainService.class, FloatingIPDNSDomainServiceImpl.class);
+		bind(FloatingIPDNSEntryService.class, FloatingIPDNSEntryServiceImpl.class);
+		bind(HostAggregateService.class,HostAggregateServiceImpl.class);
 	}
 
 	/**

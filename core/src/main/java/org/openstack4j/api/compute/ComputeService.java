@@ -94,5 +94,15 @@ public interface ComputeService extends RestService {
 	 * @return ServerGroup service
 	 */
 	ServerGroupService serverGroups();
-	
+
+	/**
+	 * Service that manages the extension 'os-floating-ip-dns'
+	 * 
+	 * @return the floating IP DNS Service
+	 */
+	FloatingIPDNSService floatingIPDNS();
+	/**
+	 * Host Aggregates Management Service
+	 */
+	HostAggregateService hostAggregates();
 }
