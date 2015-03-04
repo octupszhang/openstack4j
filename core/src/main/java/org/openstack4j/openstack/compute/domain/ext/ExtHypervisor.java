@@ -3,6 +3,7 @@ package org.openstack4j.openstack.compute.domain.ext;
 import java.util.List;
 
 import org.openstack4j.core.transport.ObjectMapperSingleton;
+import org.openstack4j.model.ModelEntity;
 import org.openstack4j.model.compute.ext.Hypervisor;
 import org.openstack4j.openstack.common.ListResult;
 
@@ -206,11 +207,37 @@ public class ExtHypervisor implements Hypervisor {
 
         @JsonProperty("hypervisors")
         List<ExtHypervisor> hypervisors;
+        @JsonProperty("allocation_ratio")
+        AllocationRatio allocationRatio;
 
         @Override
         protected List<ExtHypervisor> value() {
             return hypervisors;
         }
+        
+        public AllocationRatio getAllocationRatio() {
+        	return allocationRatio;
+        }
+
+    }
+    
+
+    public static class AllocationRatio implements ModelEntity{
+    	
+    	private static final long serialVersionUID = 1L;
+    	private double cpu;
+    	private double mem;
+    	private double disk;
+
+		public double getCpu() {
+			return cpu;
+		}
+		public double getMem() {
+			return mem;
+		}
+		public double getDisk() {
+			return disk;
+		}
 
     }
 
