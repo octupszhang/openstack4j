@@ -5,6 +5,7 @@ import java.util.List;
 import org.openstack4j.common.RestService;
 import org.openstack4j.model.compute.ext.Hypervisor;
 import org.openstack4j.model.compute.ext.HypervisorStatistics;
+import org.openstack4j.openstack.compute.domain.ext.ExtHypervisor.Hypervisors;
 
 /**
  * API which supports the "os-hypervisors" extension.  For more details
@@ -22,6 +23,13 @@ public interface HypervisorService extends RestService {
 	   * @return the available hypervisors in detail
 	   */
 		List<? extends Hypervisor> list();
+		
+		/**
+		 * The Hypervisors for this OpenStack deployment. Containing suning ratio
+		 * 
+		 * @return Hypervisors
+		 */
+		Hypervisors  details();
 		
 		/**
 		 * The Hypervisor Statistics for this OpenStack Deployment
