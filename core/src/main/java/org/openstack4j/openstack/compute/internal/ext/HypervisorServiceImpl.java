@@ -31,4 +31,12 @@ public class HypervisorServiceImpl extends BaseComputeServices implements Hyperv
 		return get(ExtHypervisorStatistics.class, "/os-hypervisors/statistics").execute();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Hypervisors details() {
+		return get(Hypervisors.class, "/os-hypervisors/detail").execute();
+	}
+
 }
