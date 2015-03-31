@@ -17,6 +17,8 @@ public class NeutronLbPoolStats implements LbPoolStats {
 	private Integer totalConnections;
 	@JsonProperty("active_connections")
 	private Integer activeConnections;
+	@JsonProperty("request_rate")
+	private Integer requestRate;
 
 	/**
 	 * 
@@ -49,6 +51,14 @@ public class NeutronLbPoolStats implements LbPoolStats {
 	@Override
 	public Integer getActiveConnections() {
 		return activeConnections;
+	}
+	/**
+	 * 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Integer getRequestRate() {
+		return requestRate;
 	}
 
 }

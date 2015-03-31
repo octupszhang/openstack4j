@@ -26,4 +26,10 @@ public interface LbPoolStats extends ModelEntity{
 	 * @return The number of active connections of the loadbalancer.
 	 */
 	public Integer getActiveConnections();
+
+	/**
+	 * 
+	 * @return The number of request rate of the loadbalancer.
+	 */
+	Integer getRequestRate();
 }
