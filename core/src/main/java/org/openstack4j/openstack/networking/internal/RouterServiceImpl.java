@@ -6,7 +6,9 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.List;
 
 import org.openstack4j.api.networking.RouterService;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.core.transport.ExecutionOptions;
+import org.openstack4j.core.transport.propagation.PropagateOnStatus;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.network.AttachInterfaceType;
 import org.openstack4j.model.network.HostRoute;
 import org.openstack4j.model.network.Router;
@@ -79,10 +81,12 @@ public class RouterServiceImpl extends BaseNetworkingServices implements RouterS
 		RouterBuilder rb = NeutronRouter.builder().name(router.getName()).adminStateUp(router.isAdminStateUp()).externalGateway(router.getExternalGatewayInfo());
 		List<? extends HostRoute> routes = router.getRoutes();
 		
-		if (routes != null) {
+		if (routes != null && !routes.isEmpty()) {
 		  for (HostRoute route : routes) {
-		    rb.route(route.getDestination(), route.getNexthop());
+			rb.route(route.getDestination(), route.getNexthop());
 		  }
+		} else {
+			rb.noRoutes();
 		}
 		
 		return put(NeutronRouter.class, uri("/routers/%s", router.getId()))
@@ -110,7 +114,9 @@ public class RouterServiceImpl extends BaseNetworkingServices implements RouterS
 	public RouterInterface detachInterface(String routerId, String subnetId, String portId) {
 		checkNotNull(routerId);
 		checkState(!(subnetId == null && portId == null), "Either a Subnet or Port identifier must be set");
-		return put(NeutronRouterInterface.class, uri("/routers/%s/remove_router_interface", routerId)).entity(new NeutronRouterInterface(subnetId, portId)).execute();
+		return put(NeutronRouterInterface.class, uri("/routers/%s/remove_router_interface", routerId))
+		           .entity(new NeutronRouterInterface(subnetId, portId))
+		           .execute(ExecutionOptions.<NeutronRouterInterface>create(PropagateOnStatus.on(404)));
 	}
 
 }

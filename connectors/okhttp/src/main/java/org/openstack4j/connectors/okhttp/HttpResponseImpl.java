@@ -1,23 +1,26 @@
 package org.openstack4j.connectors.okhttp;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.Headers;
+import okhttp3.Response;
 import org.openstack4j.api.exceptions.ClientResponseException;
+import org.openstack4j.core.transport.ClientConstants;
 import org.openstack4j.core.transport.ExecutionOptions;
 import org.openstack4j.core.transport.HttpEntityHandler;
 import org.openstack4j.core.transport.HttpResponse;
 import org.openstack4j.core.transport.ObjectMapperSingleton;
-import org.openstack4j.openstack.logging.Logger;
-import org.openstack4j.openstack.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.squareup.okhttp.Headers;
-import com.squareup.okhttp.Response;
 
 public class HttpResponseImpl implements HttpResponse {
+
     private static final Logger LOG = LoggerFactory.getLogger(HttpResponseImpl.class);
-    private Response response;
+    private final Response response;
 
     private HttpResponseImpl(Response response) {
         this.response = response;
@@ -63,7 +66,7 @@ public class HttpResponseImpl implements HttpResponse {
      */
     @Override
     public <T> T getEntity(Class<T> returnType, ExecutionOptions<T> options) {
-       return HttpEntityHandler.handle(this, returnType, options, Boolean.TRUE);
+        return HttpEntityHandler.handle(this, returnType, options, Boolean.TRUE);
     }
 
     /**
@@ -74,7 +77,7 @@ public class HttpResponseImpl implements HttpResponse {
     public int getStatus() {
         return response.code();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -118,8 +121,20 @@ public class HttpResponseImpl implements HttpResponse {
         try {
             return ObjectMapperSingleton.getContext(typeToReadAs).reader(typeToReadAs).readValue(response.body().string());
         } catch (Exception e) {
-            LOG.error(e, e.getMessage());
+            LOG.error(e.getMessage(), e);
             throw new ClientResponseException(e.getMessage(), 0, e);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (response != null) {
+            response.body().close();
+        }
+    }
+
+    @Override
+    public String getContentType() {
+        return header(ClientConstants.HEADER_CONTENT_TYPE);
     }
 }

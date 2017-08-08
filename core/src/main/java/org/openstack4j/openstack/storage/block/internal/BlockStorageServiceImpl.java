@@ -1,9 +1,14 @@
 package org.openstack4j.openstack.storage.block.internal;
 
 import org.openstack4j.api.Apis;
+import org.openstack4j.api.storage.BlockQuotaSetService;
 import org.openstack4j.api.storage.BlockStorageService;
+import org.openstack4j.api.storage.BlockVolumeBackupService;
 import org.openstack4j.api.storage.BlockVolumeService;
 import org.openstack4j.api.storage.BlockVolumeSnapshotService;
+import org.openstack4j.api.storage.CinderZoneService;
+import org.openstack4j.api.storage.SchedulerStatsGetPoolService;
+import org.openstack4j.api.storage.ext.BlockStorageServiceService;
 import org.openstack4j.model.storage.block.BlockLimits;
 import org.openstack4j.openstack.storage.block.domain.CinderBlockLimits;
 
@@ -37,5 +42,41 @@ public class BlockStorageServiceImpl extends BaseBlockStorageServices implements
     public BlockLimits getLimits() {
         return get(CinderBlockLimits.class, "/limits").execute();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BlockQuotaSetService quotaSets() {
+        return Apis.get(BlockQuotaSetService.class);
+    }
+
+    @Override
+    public CinderZoneService zones()
+    {
+       return Apis.get(CinderZoneService.class); 
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SchedulerStatsGetPoolService schedulerStatsPools() { return Apis.get(SchedulerStatsGetPoolService.class); }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BlockVolumeBackupService backups() { 
+		return Apis.get(BlockVolumeBackupService.class); 
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BlockStorageServiceService services() {
+		return Apis.get(BlockStorageServiceService.class);
+	}
 
 }

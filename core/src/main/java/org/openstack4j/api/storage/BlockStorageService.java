@@ -1,5 +1,6 @@
 package org.openstack4j.api.storage;
 
+import org.openstack4j.api.storage.ext.BlockStorageServiceService;
 import org.openstack4j.common.RestService;
 import org.openstack4j.model.storage.block.BlockLimits;
 
@@ -20,10 +21,38 @@ public interface BlockStorageService extends RestService {
 	 */
 	BlockVolumeSnapshotService snapshots();
 	
+	CinderZoneService zones();
+	
 	/**
 	 * Gets the Absolute limits used by this tenant
 	 * 
 	 * @return the absolute limits
 	 */
 	BlockLimits getLimits();
+	
+	/**
+	 * The block storage quota-set service.  
+	 * 
+	 * @return the quota-set service
+	 */
+	BlockQuotaSetService quotaSets();
+
+	/**
+	 * The block storage get_pools service.
+	 *
+	 * @return the scheduler stats service
+	 */
+	SchedulerStatsGetPoolService schedulerStatsPools();
+	
+	/**
+	 * @return the Volume Service API
+	 */
+	BlockVolumeBackupService backups();
+	
+	/**
+	 * The block storage service service
+	 * 
+	 * @return ServiceService
+	 */
+	 BlockStorageServiceService services();
 }

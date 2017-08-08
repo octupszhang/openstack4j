@@ -1,6 +1,6 @@
 package org.openstack4j.openstack.compute.domain;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +9,7 @@ import org.openstack4j.model.compute.Flavor;
 import org.openstack4j.model.compute.Image;
 import org.openstack4j.model.compute.NetworkCreate;
 import org.openstack4j.model.compute.Personality;
+import org.openstack4j.model.compute.SecurityGroup;
 import org.openstack4j.model.compute.Server.DiskConfig;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
@@ -33,9 +34,9 @@ public class NovaServerCreate implements ServerCreate {
     private String accessIPv6;
     private Integer min;
     private Integer max;
-    private DiskConfig diskConfig = DiskConfig.MANUAL;
+    private DiskConfig diskConfig;
     @JsonProperty("metadata")
-    private Map<String, String> metadata = new HashMap<String, String>();
+    private Map<String, String> metadata;
     @JsonProperty("user_data")
     private String userData;
     @JsonProperty("key_name")
@@ -43,21 +44,21 @@ public class NovaServerCreate implements ServerCreate {
     @JsonProperty("availability_zone")
     private String availabilityZone;
     @JsonProperty("config_drive")
-    private boolean configDrive;
+    private Boolean configDrive;
     
     @JsonIgnore
-    private transient Map<String, String> schedulerHints;
+    private transient Map<String, Object> schedulerHints;
 
     @JsonProperty("security_groups")
     private List<SecurityGroup> securityGroups;
 
     @JsonProperty("networks")
-    private List<NovaNetworkCreate> networks = Lists.newArrayList();
+    private List<NovaNetworkCreate> networks;
 
     private List<Personality> personality;
 
     @JsonProperty("block_device_mapping_v2")
-    private List<BlockDeviceMappingCreate> blockDeviceMapping = Lists.newArrayList();
+    private List<BlockDeviceMappingCreate> blockDeviceMapping;
 
     public static ServerCreateBuilder builder() {
         return new ServerCreateConcreteBuilder();
@@ -68,15 +69,19 @@ public class NovaServerCreate implements ServerCreate {
         return new ServerCreateConcreteBuilder(this);
     }
 
+    @Override
     public String getName() {
         return name;
     }
+    @Override
     public String getAdminPass() {
         return adminPass;
     }
+    @Override
     public String getImageRef() {
         return imageRef;
     }
+    @Override
     public String getFlavorRef() {
         return flavorRef;
     }
@@ -131,19 +136,24 @@ public class NovaServerCreate implements ServerCreate {
     
     @JsonIgnore
     @Override
-    public Map<String, String> getSchedulerHints() {
+    public Map<String, Object> getSchedulerHints() {
         return schedulerHints;
     }
 
+    @Override
+    @JsonIgnore
     public boolean isConfigDrive() {
-        return configDrive;
+        return configDrive != null && configDrive;
+    }
+
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    @Override
+    public List<? extends NetworkCreate> getNetworks() {
+        return (List<? extends NetworkCreate>) (networks != null ? networks : Collections.emptyList());
     }
 
     @Override
-    public List<? extends NetworkCreate> getNetworks() {
-        return networks;
-    }
-
     public List<Personality> getPersonality() {
         return personality;
     }
@@ -164,14 +174,21 @@ public class NovaServerCreate implements ServerCreate {
 
     @Override
     public void addNetwork(String id, String fixedIP) {
+        initNetworks();
         networks.add(new NovaNetworkCreate(id, fixedIP));
     }
 
     @Override
     public void addNetworkPort(String id) {
+        initNetworks();
         networks.add(new NovaNetworkCreate(null,null,id));
     }
 
+    private void initNetworks() {
+        if (networks == null)
+            networks = Lists.newArrayList();
+    }
+    
     static class SecurityGroupInternal implements SecurityGroup {
 
         private static final long serialVersionUID = 1L;
@@ -184,7 +201,6 @@ public class NovaServerCreate implements ServerCreate {
         public String getName() {
             return name;
         }
-
     }
 
     public static class ServerCreateConcreteBuilder implements ServerCreateBuilder {
@@ -199,26 +215,31 @@ public class NovaServerCreate implements ServerCreate {
             this.m = m;
         }
 
+        @Override
         public ServerCreateConcreteBuilder name(String name) {
             m.name = name;
             return this;
         }
 
+        @Override
         public ServerCreateConcreteBuilder flavor(String flavorId) {
             m.flavorRef = flavorId;
             return this;
         }
 
+        @Override
         public ServerCreateConcreteBuilder flavor(Flavor flavor) {
             m.flavorRef = flavor.getId();
             return this;
         }
 
+        @Override
         public ServerCreateConcreteBuilder image(String imageId) {
             m.imageRef = imageId;
             return this;
         }
 
+        @Override
         public ServerCreateConcreteBuilder image(Image image) {
             m.imageRef = image.getId();
             return this;
@@ -289,6 +310,9 @@ public class NovaServerCreate implements ServerCreate {
 
         @Override
         public ServerCreateBuilder blockDevice(BlockDeviceMappingCreate blockDevice) {
+            if (blockDevice != null && m.blockDeviceMapping == null) {
+                m.blockDeviceMapping = Lists.newArrayList();
+            }
             m.blockDeviceMapping.add(blockDevice);
             return this;
         }
@@ -316,6 +340,15 @@ public class NovaServerCreate implements ServerCreate {
 
         @Override
         public ServerCreateBuilder addSchedulerHint(String key, String value) {
+            return addSchedulerHintItem(key, value);
+        }
+        
+        @Override
+        public ServerCreateBuilder addSchedulerHint(String key, List<String> value) {
+            return addSchedulerHintItem(key, value);
+        }
+        
+        private ServerCreateBuilder addSchedulerHintItem(String key, Object value) {
             if (m.schedulerHints == null)
                 m.schedulerHints = Maps.newHashMap();
             
@@ -324,10 +357,22 @@ public class NovaServerCreate implements ServerCreate {
         }
 
         @Override
-        public ServerCreateBuilder addSchedulerHints(Map<String, String> schedulerHints) {
+        public ServerCreateBuilder addSchedulerHints(Map<String, Object> schedulerHints) {
             m.schedulerHints = schedulerHints;
             return this;
         }
-
+        
+        @Override
+        public ServerCreateBuilder addAdminPass(String adminPass){
+        	m.adminPass = adminPass;
+        	return this;
+        }
+		
+	@Override
+	public ServerCreateBuilder configDrive(boolean configDrive){
+		m.configDrive=configDrive;
+		return this;
+	}
+        
     }
 }

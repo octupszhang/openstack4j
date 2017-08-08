@@ -1,7 +1,7 @@
 package org.openstack4j.model.network.builder;
 
 import org.openstack4j.common.Buildable.Builder;
-import org.openstack4j.model.identity.Tenant;
+import org.openstack4j.model.identity.v3.Tenant;
 import org.openstack4j.model.network.ExternalGateway;
 import org.openstack4j.model.network.Router;
 
@@ -45,7 +45,7 @@ public interface RouterBuilder extends Builder<RouterBuilder, Router> {
 	/**
 	 * @see Router#getExternalGatewayInfo()
 	 */
-	RouterBuilder externalGateway(String networkId, boolean enableSNAT);
+	RouterBuilder externalGateway(String networkId, Boolean enableSNAT);
 	
 	/**
 	 * @see Router#getExternalGatewayInfo()
@@ -53,7 +53,24 @@ public interface RouterBuilder extends Builder<RouterBuilder, Router> {
 	RouterBuilder externalGateway(ExternalGateway externalGateway);
 	
 	/**
+	 * Removes the external gateway from the router during an update operation
+	 */
+	RouterBuilder clearExternalGateway();
+
+	/**
 	 * @see Router#getRoutes()
 	 */
 	RouterBuilder route(String destination, String nexthop);
+
+	/**
+	 * Removes the static routes from the router during an update operation
+	 */
+	RouterBuilder noRoutes();
+	
+	/**
+	 * 
+	 * @param distributed:true indicates a distributed router. It is available when dvr extension is enabled.
+	 * @return
+	 */
+	RouterBuilder distributed(Boolean distributed);
 }

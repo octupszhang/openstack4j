@@ -1,42 +1,30 @@
 package org.openstack4j.connectors.httpclient;
 
+import com.google.common.net.MediaType;
+import org.apache.http.client.entity.EntityBuilder;
+import org.apache.http.client.methods.*;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.openstack4j.api.exceptions.ConnectionException;
+import org.openstack4j.core.transport.HttpRequest;
+import org.openstack4j.core.transport.ObjectMapperSingleton;
+import org.openstack4j.core.transport.functions.EndpointURIFromRequestFunction;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.EntityBuilder;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.openstack4j.api.exceptions.ConnectionException;
-import org.openstack4j.core.transport.Config;
-import org.openstack4j.core.transport.HttpRequest;
-import org.openstack4j.core.transport.ObjectMapperSingleton;
-import org.openstack4j.core.transport.UntrustedSSL;
-import org.openstack4j.core.transport.functions.EndpointURIFromRequestFunction;
-
 /**
- * HttpCommand is responsible for executing the actual request driven by the HttpExecutor. 
- * 
+ * HttpCommand is responsible for executing the actual request driven by the
+ * HttpExecutor.
+ *
  * @param <R>
  */
 public final class HttpCommand<R> {
-
-    private static final String USER_AGENT = "OpenStack4j-Agent";
 
     private HttpRequest<R> request;
     private CloseableHttpClient client;
@@ -49,7 +37,9 @@ public final class HttpCommand<R> {
 
     /**
      * Creates a new HttpCommand from the given request
-     * @param request the request
+     * 
+     * @param request
+     *            the request
      * @return the command
      */
     public static <R> HttpCommand<R> create(HttpRequest<R> request) {
@@ -60,35 +50,13 @@ public final class HttpCommand<R> {
 
     private void initialize() {
         URI url = null;
-        try
-        {
+        try {
             url = populateQueryParams(request);
+        } catch (URISyntaxException e) {
+            throw new ConnectionException(e.getMessage(), e.getIndex(), e);
         }
-        catch (URISyntaxException e) {
-            throw new ConnectionException(e.getMessage(),e.getIndex(), e);
-        }
+        client = HttpClientFactory.INSTANCE.getClient(request.getConfig());
 
-        HttpClientBuilder cb = HttpClientBuilder.create().setUserAgent(USER_AGENT);
-        final Config config = request.getConfig();
-
-        if (config.isIgnoreSSLVerification())
-        {
-            cb.setSslcontext(UntrustedSSL.getSSLContext());
-            cb.setHostnameVerifier(new AllowAllHostnameVerifier());
-        }
-        
-        if (config.getSslContext() != null)
-            cb.setSslcontext(config.getSslContext());
-
-        RequestConfig.Builder rcb = RequestConfig.custom();
-        if (config.getConnectTimeout() > 0)
-            rcb.setConnectTimeout(config.getConnectTimeout());
-        
-        if (config.getReadTimeout() > 0)
-            rcb.setSocketTimeout(config.getReadTimeout());
-        
-        client = cb.setDefaultRequestConfig(rcb.build()).build();
-        
         switch (request.getMethod()) {
         case POST:
             clientReq = new HttpPost(url);
@@ -102,46 +70,44 @@ public final class HttpCommand<R> {
         case HEAD:
             clientReq = new HttpHead(url);
             break;
+        case PATCH:
+            clientReq = new HttpPatch(url);
+            break;
         case GET:
-        default:
             clientReq = new HttpGet(url);
             break;
-        }
+        default:
+            throw new IllegalArgumentException("Unsupported http method: " + request.getMethod());
+        } 
+        clientReq.setHeader("Accept", MediaType.JSON_UTF_8.toString());
         populateHeaders(request);
     }
 
     /**
      * Executes the command and returns the Response
-     * 
+     *
      * @return the response
-     * @throws Exception 
+     * @throws Exception
      */
     public CloseableHttpResponse execute() throws Exception {
 
         EntityBuilder builder = null;
 
         if (request.getEntity() != null) {
-            if (InputStream.class.isAssignableFrom(request.getEntity().getClass())) 
-            {
-                InputStreamEntity ise = new InputStreamEntity((InputStream)request.getEntity(), ContentType.create(request.getContentType()));
-                ((HttpEntityEnclosingRequestBase)clientReq).setEntity(ise);
+            if (InputStream.class.isAssignableFrom(request.getEntity().getClass())) {
+                InputStreamEntity ise = new InputStreamEntity((InputStream) request.getEntity(),
+                        ContentType.create(request.getContentType()));
+                ((HttpEntityEnclosingRequestBase) clientReq).setEntity(ise);
+            } else {
+                builder = EntityBuilder.create().setContentType(ContentType.create(request.getContentType(), "UTF-8"))
+                        .setText(ObjectMapperSingleton.getContext(request.getEntity().getClass()).writer()
+                                .writeValueAsString(request.getEntity()));
             }
-            else
-            {
-                builder = EntityBuilder.create()
-                	.setContentType(ContentType.create(request.getContentType(),"UTF-8"))
-                    .setText(ObjectMapperSingleton.getContext(request.getEntity().getClass()).writer().writeValueAsString(request.getEntity()))
-                    .setContentEncoding("UTF-8");
-            }
-        }
-        else if(request.hasJson()) {
-            builder = EntityBuilder.create()
-                    .setContentType(ContentType.APPLICATION_JSON)
-                    .setText(request.getJson())
-                    .setContentEncoding("UTF-8");
+        } else if (request.hasJson()) {
+            builder = EntityBuilder.create().setContentType(ContentType.APPLICATION_JSON).setText(request.getJson());
         }
         if (builder != null && clientReq instanceof HttpEntityEnclosingRequestBase)
-            ((HttpEntityEnclosingRequestBase)clientReq).setEntity(builder.build());
+            ((HttpEntityEnclosingRequestBase) clientReq).setEntity(builder.build());
 
         return client.execute(clientReq);
     }
@@ -176,11 +142,11 @@ public final class HttpCommand<R> {
     private URI populateQueryParams(HttpRequest<R> request) throws URISyntaxException {
 
         URIBuilder uri = new URIBuilder(new EndpointURIFromRequestFunction().apply(request));
-        
-        if (!request.hasQueryParams()) 
+
+        if (!request.hasQueryParams())
             return uri.build();
 
-        for(Map.Entry<String, List<Object> > entry : request.getQueryParams().entrySet()) {
+        for (Map.Entry<String, List<Object>> entry : request.getQueryParams().entrySet()) {
             for (Object o : entry.getValue()) {
                 uri.addParameter(entry.getKey(), String.valueOf(o));
             }
@@ -190,9 +156,10 @@ public final class HttpCommand<R> {
 
     private void populateHeaders(HttpRequest<R> request) {
 
-        if (!request.hasHeaders()) return;
+        if (!request.hasHeaders())
+            return;
 
-        for(Map.Entry<String, Object> h : request.getHeaders().entrySet()) {
+        for (Map.Entry<String, Object> h : request.getHeaders().entrySet()) {
             clientReq.addHeader(h.getKey(), String.valueOf(h.getValue()));
         }
     }

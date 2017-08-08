@@ -3,14 +3,16 @@ package org.openstack4j.api.network;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openstack4j.api.AbstractTest;
 import org.openstack4j.api.Builders;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
+import org.openstack4j.model.network.ext.Protocol;
+import org.openstack4j.model.network.ext.SessionPersistenceType;
 import org.openstack4j.model.network.ext.Vip;
 import org.openstack4j.model.network.ext.VipUpdate;
-import org.openstack4j.openstack.networking.domain.ext.Protocol;
-import org.openstack4j.openstack.networking.domain.ext.SessionPersistenceType;
 import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -19,23 +21,23 @@ import static org.testng.Assert.assertTrue;
  * @author liujunpeng
  *
  */
-@Test(suiteName="Network/vip")
+@Test(suiteName="Network/vip", enabled=false)
 public class VipTests extends AbstractTest{
 	public void testListVip(){
-		List<? extends Vip> list = os().networking().loadbalancers().vip().list();
+		List<? extends Vip> list = osv3().networking().loadbalancers().vip().list();
 		System.out.println("test lb vip List"+list);
 		assertEquals(1, list.size());
 	}
 	public void testListVipFilter(){
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("name", "vip");
-		List<? extends Vip> list = os().networking().loadbalancers().vip().list(map);
+		List<? extends Vip> list = osv3().networking().loadbalancers().vip().list(map);
 		System.out.println("test lb vip List filter"+list);
 		assertEquals(1, list.size());
 	}
 	public void testGetVip(){
 		String id = "dfc5c198-dceb-4f99-8ed7-5ebfdf46946d";
-		Vip vip = os().networking().loadbalancers().vip().get(id);
+		Vip vip = osv3().networking().loadbalancers().vip().get(id);
 		System.out.println("test get a vip"+vip);
 		assertEquals(id, vip.getId());
 
@@ -53,21 +55,21 @@ public class VipTests extends AbstractTest{
 				.description("vip")
 				.name(name)
 				.poolId(poolId)
-				.protocol(Protocol.HTTP.toString())
+				.protocol(Protocol.HTTP)
 				.protocolPort(port)
 				.sessionPersistence(Builders
 						.sessionPersistence()
 						.cookieName("cookie")
-						.type(SessionPersistenceType.APP_COOKIE.toString())
+						.type(SessionPersistenceType.APP_COOKIE)
 						.build())
 				.subnetId(subnetId)
 				.tenantId(tenantId)
 				.build();
-		Vip result = os().networking().loadbalancers().vip().create(create);
+		Vip result = osv3().networking().loadbalancers().vip().create(create);
 		System.out.println(result);
 		assertEquals(address, result.getAddress());
 		assertEquals(name, result.getName());
-		assertEquals(Protocol.HTTP.toString(), result.getProtocol());
+		assertEquals(Protocol.HTTP, result.getProtocol());
 		assertEquals(port, result.getProtocolPort());
 	}
 	
@@ -83,23 +85,23 @@ public class VipTests extends AbstractTest{
 				.poolId(poolId)
 				.sessionPersistence(Builders
 						.sessionPersistence()
-						.type(SessionPersistenceType.SOURCE_IP.toString())
+						.type(SessionPersistenceType.SOURCE_IP)
 						.build())
 				.description("description update")
 				.build();
-		Vip result = os().networking().loadbalancers().vip().update(vipId, update);
+		Vip result = osv3().networking().loadbalancers().vip().update(vipId, update);
 		System.out.println(result);
 		assertEquals(poolId, result.getPoolId());
 		assertEquals(connectionLimit, result.getConnectionLimit());
 		assertEquals(name, result.getName());
-		assertEquals(SessionPersistenceType.SOURCE_IP.toString(), result
+		assertEquals(SessionPersistenceType.SOURCE_IP, result
 				.getSessionPersistence().getType());
 	
 	}
 	
 	public void testDeleteVip(){
 		String id = "50cbd265-fe4f-4c9c-b25c-bb6c773d0366";
-		ActionResponse result = os().networking().loadbalancers().vip().delete(id);
+		ActionResponse result = osv3().networking().loadbalancers().vip().delete(id);
 		assertTrue(result.isSuccess());
 		
 	}

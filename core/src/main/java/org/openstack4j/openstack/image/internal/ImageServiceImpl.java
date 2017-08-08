@@ -1,30 +1,34 @@
 package org.openstack4j.openstack.image.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import org.openstack4j.api.client.CloudProvider;
+import org.openstack4j.api.exceptions.ResponseException;
 import org.openstack4j.api.image.ImageService;
-
-import static org.openstack4j.core.transport.ClientConstants.CONTENT_TYPE_OCTECT_STREAM;
-import static org.openstack4j.core.transport.ClientConstants.HEADER_ACCEPT;
-
 import org.openstack4j.core.transport.ExecutionOptions;
 import org.openstack4j.core.transport.HttpResponse;
+import org.openstack4j.core.transport.propagation.PropagateOnStatus;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.common.Payload;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.image.CachedImage;
 import org.openstack4j.model.image.Image;
 import org.openstack4j.model.image.ImageMember;
+import org.openstack4j.openstack.image.domain.CachedGlanceImage.CachedImages;
 import org.openstack4j.openstack.image.domain.GlanceImage;
 import org.openstack4j.openstack.image.domain.GlanceImage.Images;
 import org.openstack4j.openstack.image.domain.GlanceImageMember;
 import org.openstack4j.openstack.image.domain.GlanceImageMember.Members;
 import org.openstack4j.openstack.image.domain.functions.ImageForUpdateToHeaders;
 import org.openstack4j.openstack.image.domain.functions.ImageFromHeadersFunction;
+
+import javax.annotation.Nullable;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.openstack4j.core.transport.ClientConstants.CONTENT_TYPE_OCTECT_STREAM;
+import static org.openstack4j.core.transport.ClientConstants.HEADER_ACCEPT;
+import static org.openstack4j.core.transport.HttpEntityHandler.statusAndClose;
+
 
 /**
  * OpenStack (Glance) Image based Operations
@@ -33,12 +37,29 @@ import org.openstack4j.openstack.image.domain.functions.ImageFromHeadersFunction
  */
 public class ImageServiceImpl extends BaseImageServices implements ImageService {
 
+    private static final int DEFAULT_PAGE_SIZE = 25;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<? extends CachedImage> listChachedImages() {
+        try {
+            return get(CachedImages.class, uri("/cached_images"))
+                    .execute(ExecutionOptions.<CachedImages>create(PropagateOnStatus.on(404))).getList();
+        }
+        catch (ResponseException e) {
+            return null;
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public List<? extends Image> list() {
-        return get(Images.class, uri("/images/detail")).execute().getList();
+        String uri = getProvider() == CloudProvider.RACKSPACE ? "/images" : "/images/detail";
+        return get(Images.class, uri(uri)).execute().getList();
     }
 
     /**
@@ -46,13 +67,45 @@ public class ImageServiceImpl extends BaseImageServices implements ImageService 
      */
     @Override
     public List<? extends Image> list(Map<String, String> filteringParams) {
+        Invocation<Images> imageInvocation = buildInvocation(filteringParams);
+        return imageInvocation.execute().getList();
+    }
+    
+    public List<? extends Image> listAll(Map<String, String> filteringParams) {
+        Invocation<Images> imageInvocation = buildInvocation(filteringParams);
+        
+        int limit = DEFAULT_PAGE_SIZE;
+        if(filteringParams != null && filteringParams.containsKey("limit")) {
+            limit = Integer.parseInt(filteringParams.get("limit"));
+        }
+        
+        List<GlanceImage> totalList = imageInvocation.execute().getList();
+        List<GlanceImage> currList = totalList;
+        while (currList.size() == limit) {
+          
+            imageInvocation.updateParam("marker", currList.get(limit - 1).getId());
+            currList = imageInvocation.execute().getList();
+            totalList.addAll(currList);
+        }        
+        
+        return totalList;
+    }
+
+    public List<? extends Image> listAll() {
+        return listAll(null);
+    }
+    
+    private Invocation<Images> buildInvocation(Map<String, String> filteringParams) {
         Invocation<Images> imageInvocation = get(Images.class, "/images/detail");
+        if (filteringParams == null) {
+            return imageInvocation;
+        }
         if (filteringParams != null) {
             for (Map.Entry<String, String> entry : filteringParams.entrySet()) {
                 imageInvocation = imageInvocation.param(entry.getKey(), entry.getValue());
             }
         }
-        return imageInvocation.execute().getList();
+        return imageInvocation;
     }
 
     /**
@@ -71,7 +124,7 @@ public class ImageServiceImpl extends BaseImageServices implements ImageService 
     @Override
     public ActionResponse delete(String imageId) {
         checkNotNull(imageId);
-        return deleteWithResponse(uri("/images/%s", imageId)).execute();
+        return deleteWithResponse(uri("/images/%s", imageId)).param("format", "json").execute();
     }
 
     /**
@@ -143,7 +196,7 @@ public class ImageServiceImpl extends BaseImageServices implements ImageService 
     public boolean addMember(String imageId, String tenantId) {
         checkNotNull(imageId);
         checkNotNull(tenantId);
-        return put(Void.class, uri("/images/%s/members/%s", imageId, tenantId)).executeWithResponse().getStatus() == 204;
+        return statusAndClose(put(Void.class, uri("/images/%s/members/%s", imageId, tenantId)).executeWithResponse()) == 204;
     }
 
     /**
@@ -153,7 +206,7 @@ public class ImageServiceImpl extends BaseImageServices implements ImageService 
     public boolean addMember(String imageId, String tenantId, boolean canShare) {
         checkNotNull(imageId);
         checkNotNull(tenantId);
-        return put(Void.class, uri("/images/%s/members/%s", imageId, tenantId)).entity(new GlanceImageMember(null, canShare)).executeWithResponse().getStatus() == 204;
+        return statusAndClose(put(Void.class, uri("/images/%s/members/%s", imageId, tenantId)).entity(new GlanceImageMember(null, canShare)).executeWithResponse()) == 204;
     }
 
     /**
@@ -163,7 +216,6 @@ public class ImageServiceImpl extends BaseImageServices implements ImageService 
     public boolean removeMember(String imageId, String tenantId) {
         checkNotNull(imageId);
         checkNotNull(tenantId);
-        return delete(Void.class, uri("/images/%s/members/%s", imageId, tenantId)).executeWithResponse().getStatus() == 204;
+        return statusAndClose(delete(Void.class, uri("/images/%s/members/%s", imageId, tenantId)).executeWithResponse()) == 204;
     }
-
 }

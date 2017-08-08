@@ -132,7 +132,7 @@ public interface ServerCreate extends ModelEntity, Buildable<ServerCreateBuilder
 	 * 
 	 * @return scheduler hints or null
 	 */
-	Map<String, String> getSchedulerHints();
+	Map<String, Object> getSchedulerHints();
 	
 	/**
 	 * Adds the personality.
@@ -163,13 +163,5 @@ public interface ServerCreate extends ModelEntity, Buildable<ServerCreateBuilder
 	 */
 	void addNetworkPort(String id);
 	
-	public interface SecurityGroup extends ModelEntity {
-		
-		/**
-		 * Gets the name.
-		 *
-		 * @return the name
-		 */
-		String getName();
-	}
+
 }

@@ -2,9 +2,11 @@ package org.openstack4j.api.compute;
 
 import java.util.List;
 
+import org.openstack4j.api.Builders;
 import org.openstack4j.common.RestService;
 import org.openstack4j.model.compute.Limits;
 import org.openstack4j.model.compute.QuotaSet;
+import org.openstack4j.model.compute.QuotaSetUpdate;
 import org.openstack4j.model.compute.SimpleTenantUsage;
 
 /**
@@ -31,6 +33,24 @@ public interface QuotaSetService extends RestService {
 	QuotaSet get(String tenantId, String userId);
 	
 	/**
+	 * Updates quota for a specified class
+	 * 
+	 * @param classId the class identifier
+	 * @param qs the quota set - see {@link Builders#quotaSet()}
+	 * @return the newly reflected QuotaSet
+	 */
+	QuotaSet updateForClass(String classId, QuotaSetUpdate qs);
+	
+	/**
+     * Updates quota for a specified tenant
+     * 
+     * @param tenantId the tenant identifier
+     * @param qs the quota set - see {@link Builders#quotaSet()}
+     * @return the newly reflected QuotaSet
+     */
+	QuotaSet updateForTenant(String tenantId, QuotaSetUpdate qs);
+	
+	/**
 	 * Accounts may be pre-configured with a set of thresholds (or limits) to manage capacity and prevent system abuse.  This call will
 	 * return the current Rate and Absolute Limits.
 	 * @return the system limits
@@ -51,5 +71,23 @@ public interface QuotaSetService extends RestService {
 	 * @return Tenant Usage or null if not found
 	 */
 	SimpleTenantUsage getTenantUsage(String tenantId);
+	
+	/**
+	 * Gets tenant usage information for all tenants in a period of time (os-simple-tenant-usage)
+	 * @param startTime  eg:2015-05-05T23:59:59
+	 * @param endTime
+	 * @return list of usage information for all tenants
+	 */
+	List<? extends SimpleTenantUsage> listTenantUsages(String startTime, String endTime);
+	
+	/**
+	 * Gets the usage information for the specified tenant in a period of time (os-simple-tenant-usage)
+	 * 
+	 * @param tenantId the tenant identifier
+	 * @param startTime  eg:2015-05-05T23:59:59
+	 * @param endTime
+	 * @return Tenant Usage or null if not found
+	 */
+	SimpleTenantUsage getTenantUsage(String tenantId, String startTime, String endTime);
 	
 }

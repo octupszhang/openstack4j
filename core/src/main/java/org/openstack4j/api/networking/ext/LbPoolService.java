@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.openstack4j.common.RestService;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.network.ext.HealthMonitor;
 import org.openstack4j.model.network.ext.HealthMonitorAssociate;
 import org.openstack4j.model.network.ext.LbPool;
+import org.openstack4j.model.network.ext.LbPoolStats;
 import org.openstack4j.model.network.ext.LbPoolUpdate;
 
 /**
@@ -72,6 +73,13 @@ public interface LbPoolService extends RestService {
 	LbPool update(String lbPoolId, LbPoolUpdate lbPool);
 
 	/**
+	 * Get the LbPool Stats by ID
+	 *
+	 * @param lbPoolId, the lb pool identifier
+	 */
+	LbPoolStats stats(String lbPoolId);
+
+	/**
 	 * Associates a health monitor with a specified pool.
 	 * 
 	 * @param lbPoolId
@@ -82,6 +90,17 @@ public interface LbPoolService extends RestService {
 	 */
 	HealthMonitor associateHealthMonitor(String lbPoolId,
 			HealthMonitorAssociate associate);
+	
+	/**
+     * Associates a health monitor with a specified pool.
+     * 
+     * @param lbPoolId
+     *            the lb pool identifier
+     * @param associate
+     *            HealthMonitorAssociate
+     * @return HealthMonitor
+     */
+    HealthMonitor associateHealthMonitor(String lbPoolId, String healthMonitorId);
 
 	/**
 	 * Disassociates a specified health monitor from a pool.

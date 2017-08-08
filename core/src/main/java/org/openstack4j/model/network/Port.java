@@ -1,6 +1,7 @@
 package org.openstack4j.model.network;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.openstack4j.common.Buildable;
@@ -56,5 +57,18 @@ public interface Port extends Resource, Buildable<PortBuilder> {
    */
   List<String> getSecurityGroups();
 
-	
+  /**
+   * @return The port security status. A valid value is enabled (true) or disabled (false).
+   */
+  Boolean isPortSecurityEnabled();
+  
+  String getHostId();
+
+  String getVifType();
+
+  Map<String, Object> getVifDetails();
+
+  String getvNicType();
+
+  Map<String, Object> getProfile();
 }

@@ -45,4 +45,14 @@ public interface NetworkBuilder extends Builder<NetworkBuilder, Network> {
 	 * @see Network#isShared()
 	 */
 	NetworkBuilder isShared(boolean shared);
+	
+	/**
+	 * @see Network#isRouterExternal()
+	 */
+	NetworkBuilder isRouterExternal(boolean routerExternal);
+	
+	/**
+	 * @see Network#getAvailabilityZoneHints()
+	 */
+	NetworkBuilder addAvailabilityZoneHints(String availabilityZone);
 }

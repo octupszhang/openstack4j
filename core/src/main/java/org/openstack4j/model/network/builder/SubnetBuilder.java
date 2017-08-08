@@ -1,8 +1,10 @@
 package org.openstack4j.model.network.builder;
 
 import org.openstack4j.common.Buildable.Builder;
-import org.openstack4j.model.identity.Tenant;
+import org.openstack4j.model.identity.v3.Tenant;
 import org.openstack4j.model.network.IPVersionType;
+import org.openstack4j.model.network.Ipv6AddressMode;
+import org.openstack4j.model.network.Ipv6RaMode;
 import org.openstack4j.model.network.Network;
 import org.openstack4j.model.network.Subnet;
 
@@ -68,6 +70,11 @@ public interface SubnetBuilder extends Builder<SubnetBuilder, Subnet> {
     SubnetBuilder gateway(String gateway);
 
     /**
+     * @see Subnet#isNoGateway()
+     */
+    SubnetBuilder noGateway();
+
+    /**
      * @see Subnet#getDnsNames()
      */
 	SubnetBuilder addDNSNameServer(String host);
@@ -80,5 +87,14 @@ public interface SubnetBuilder extends Builder<SubnetBuilder, Subnet> {
 	 * @returnSubnetBuilder
 	 */
 	SubnetBuilder addHostRoute(String destination, String nexthop);
-
+	
+    /**
+     * @see Subnet#getIpv6AddressMode()
+     */
+	SubnetBuilder ipv6AddressMode (Ipv6AddressMode ipv6AddressMode);
+	
+    /**
+     * @see Subnet#getIpv6RaMode()
+     */
+	SubnetBuilder ipv6RaMode(Ipv6RaMode ipv6RaMode);
 }

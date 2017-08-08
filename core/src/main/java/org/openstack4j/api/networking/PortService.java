@@ -3,8 +3,9 @@ package org.openstack4j.api.networking;
 import java.util.List;
 
 import org.openstack4j.common.RestService;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.network.Port;
+import org.openstack4j.model.network.options.PortListOptions;
 
 /**
  * OpenStack (Neutron) Port based Operations
@@ -19,6 +20,14 @@ public interface PortService extends RestService {
 	 * @return the list of ports
 	 */
 	List<? extends Port> list();
+
+	/**
+     * Lists all Ports authorized by the current Tenant
+     *
+     * @param options filtering options
+     * @return the list of ports
+     */
+    List<? extends Port> list(PortListOptions options);
 	
 	/**
 	 * Gets the Port by ID
@@ -42,6 +51,13 @@ public interface PortService extends RestService {
 	 * @return the newly create Port
 	 */
 	Port create(Port port);
+
+	/**
+	 * Creates new Ports
+	 * @param ports the ports to create
+	 * @return the newly created Ports
+	 */
+	List<? extends Port> create(List<? extends Port> ports);
 	
 	/**
 	 * Updates an existing Port.  The Port identifier must be set on the port object to be successful

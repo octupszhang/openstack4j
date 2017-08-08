@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 
 import org.openstack4j.api.compute.ComputeSecurityGroupService;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.compute.SecGroupExtension;
 import org.openstack4j.model.compute.SecGroupExtension.Rule;
 import org.openstack4j.openstack.compute.domain.NovaSecGroupExtension;
@@ -35,7 +35,7 @@ public class ComputeSecurityGroupServiceImpl extends BaseComputeServices impleme
 	@Override
 	public List<? extends SecGroupExtension> listServerGroups(String serverId) {
 		checkNotNull(serverId);
-		return get(SecurityGroups.class, uri("/os-security-groups/servers/%s/os-security-groups", serverId)).execute().getList();
+		return get(SecurityGroups.class, uri("/servers/%s/os-security-groups", serverId)).execute().getList();
 	}
 
 	/**

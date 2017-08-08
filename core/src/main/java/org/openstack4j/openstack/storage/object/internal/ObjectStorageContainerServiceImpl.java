@@ -3,10 +3,10 @@ package org.openstack4j.openstack.storage.object.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.openstack4j.core.transport.ClientConstants.CONTENT_TYPE_DIRECTORY;
 import static org.openstack4j.core.transport.ClientConstants.URI_SEP;
+import static org.openstack4j.core.transport.HttpEntityHandler.closeQuietly;
 import static org.openstack4j.model.storage.object.SwiftHeaders.CONTAINER_METADATA_PREFIX;
 import static org.openstack4j.model.storage.object.SwiftHeaders.CONTAINER_REMOVE_METADATA_PREFIX;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -14,9 +14,7 @@ import org.openstack4j.api.Apis;
 import org.openstack4j.api.storage.ObjectStorageContainerService;
 import org.openstack4j.api.storage.ObjectStorageObjectService;
 import org.openstack4j.core.transport.HttpResponse;
-import org.openstack4j.model.common.Payload;
-import org.openstack4j.model.common.Payloads;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.storage.object.SwiftContainer;
 import org.openstack4j.model.storage.object.options.ContainerListOptions;
 import org.openstack4j.model.storage.object.options.CreateUpdateContainerOptions;
@@ -38,7 +36,7 @@ public class ObjectStorageContainerServiceImpl extends BaseObjectStorageService 
      */
     @Override
     public List<? extends SwiftContainer> list() {
-          return toList(get(SwiftContainerImpl[].class).execute());
+          return toList(get(SwiftContainerImpl[].class).param("format", "json").execute());
     }
 
     /**
@@ -49,7 +47,7 @@ public class ObjectStorageContainerServiceImpl extends BaseObjectStorageService 
         if (options == null)
             return list();
         
-        return toList(get(SwiftContainerImpl[].class).params(options.getOptions()).execute());
+        return toList(get(SwiftContainerImpl[].class).param("format", "json").params(options.getOptions()).execute());
     }
     
     /**
@@ -76,8 +74,7 @@ public class ObjectStorageContainerServiceImpl extends BaseObjectStorageService 
     public String createPath(String containerName, String path) {
         checkNotNull(containerName);
         checkNotNull(path);
-        Payload<?> pl = Payloads.create(new ByteArrayInputStream(new byte[]{}));
-        return Apis.get(ObjectStorageObjectService.class).put(containerName, path, pl, 
+        return Apis.get(ObjectStorageObjectService.class).put(containerName, path, null, 
                         ObjectPutOptions.create().contentType(CONTENT_TYPE_DIRECTORY));
     }
 
@@ -100,8 +97,14 @@ public class ObjectStorageContainerServiceImpl extends BaseObjectStorageService 
     public ActionResponse delete(String name) {
         checkNotNull(name);
         HttpResponse resp = delete(Void.class, URI_SEP, name).executeWithResponse();
-        if (resp.getStatus() == 409)
-            return ActionResponse.actionFailed(String.format("Container %s is not empty", name));
+        
+        try {
+            if (resp.getStatus() == 409)
+                return ActionResponse.actionFailed(String.format("Container %s is not empty", name), 409);
+        }
+        finally {
+            closeQuietly(resp);
+        }
         
         return ToActionResponseFunction.INSTANCE.apply(resp);
     }
@@ -113,7 +116,13 @@ public class ObjectStorageContainerServiceImpl extends BaseObjectStorageService 
     public Map<String, String> getMetadata(String name) {
         checkNotNull(name);
         HttpResponse resp = head(Void.class, URI_SEP, name).executeWithResponse();
-        return MapWithoutMetaPrefixFunction.INSTANCE.apply(resp.headers());
+        try
+        {
+            return MapWithoutMetaPrefixFunction.INSTANCE.apply(resp.headers());
+        }
+        finally {
+            closeQuietly(resp);
+        }
     }
     
     /**

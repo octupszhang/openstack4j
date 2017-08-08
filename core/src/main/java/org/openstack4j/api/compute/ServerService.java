@@ -4,18 +4,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.openstack4j.api.compute.ext.InstanceActionsService;
 import org.openstack4j.api.compute.ext.InterfaceService;
 import org.openstack4j.model.compute.Action;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.compute.RebootType;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.Server.Status;
 import org.openstack4j.model.compute.ServerCreate;
+import org.openstack4j.model.compute.ServerPassword;
 import org.openstack4j.model.compute.ServerUpdateOptions;
 import org.openstack4j.model.compute.VNCConsole;
 import org.openstack4j.model.compute.VNCConsole.Type;
 import org.openstack4j.model.compute.VolumeAttachment;
 import org.openstack4j.model.compute.actions.BackupOptions;
+import org.openstack4j.model.compute.actions.EvacuateOptions;
 import org.openstack4j.model.compute.actions.LiveMigrateOptions;
 import org.openstack4j.model.compute.actions.RebuildOptions;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
@@ -156,6 +159,16 @@ public interface ServerService {
     String createSnapshot(String serverId, String snapshotName);
 
     /**
+     * Creates the snapshot from a server
+     *
+     * @param serverId the UUID of the server
+     * @param snapshotName the display name of the snapshot
+     * @param metadata the key/value properties for the snapshot
+     * @return the UUID for the resulting image snapshot
+     */
+    String createSnapshot(String serverId, String snapshotName, Map<String, String> metadata);
+
+    /**
      * Associates the specified Server Group by name to the Server by it's identifier
      * 
      * @param serverId the server identifier
@@ -191,7 +204,8 @@ public interface ServerService {
     /**
      * Will attempt to tail and return the last {@code numLines} from the given servers console.
      * @param serverId the server identifier
-     * @param numLines the number of console lines to return
+     * @param numLines the number of console lines to return.
+     * 				   If lower or equal than zero, the whole console content will be returned.
      * @return console output as string or null
      */
     String getConsoleOutput(String serverId, int numLines);
@@ -246,6 +260,7 @@ public interface ServerService {
     
     /**
      * Live-migrates a server identified with {@code serverId} to a new host without rebooting
+     * 
      * @param serverId the server identifier
      * @param options live migration options
      * @return ActionResponse
@@ -253,7 +268,17 @@ public interface ServerService {
     ActionResponse liveMigrate(String serverId, LiveMigrateOptions options); 
     
     /**
+     * Resets the state of a server to a specified {@code state}
+     * 
+     * @param serverId the server identifier
+     * @param state the new server state
+     * @return ActionResponse
+     */
+    ActionResponse resetState(String serverId, Status state); 
+    
+    /**
      * Sets up a new backup schedule service for the given {@code serverId}
+     * 
      * @param serverId the server identifier
      * @param options the backup options
      * @return ActionResponse
@@ -262,6 +287,7 @@ public interface ServerService {
     
     /**
      * Will poll the Server waiting for the {@code Status} to match or an Error state occurs for the {@code maxWait} 
+     * 
      * @param serverId the server identifier
      * @param status the status to wait for
      * @param maxWait the max wait time
@@ -311,4 +337,28 @@ public interface ServerService {
      * @return the interface service
      */
     InterfaceService interfaces();
+    
+    /**
+     * The instance actions service extension (os-instance-actions)
+     * @return the instance actions service
+     */
+    InstanceActionsService instanceActions();
+
+    /**
+     * Returns the encrypted password for the specified server which can be decrypted with
+     * the private key
+     * 
+     * @param serverId the server identifier
+     * @return the encrypted server password
+     */
+    ServerPassword getPassword(String serverId);
+
+    /**
+     * Evacuates a server identified with {@code serverId} from a failed host to a new host
+     * 
+     * @param serverId the server identifier
+     * @param options evaucate options
+     * @return an administrative password to access the evacuated or rebuilt instance.
+     */
+    ServerPassword evacuate(String serverId, EvacuateOptions options);
 }

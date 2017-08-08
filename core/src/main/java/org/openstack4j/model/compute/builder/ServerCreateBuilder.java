@@ -100,12 +100,21 @@ public interface ServerCreateBuilder extends Buildable.Builder<ServerCreateBuild
     ServerCreateBuilder addSchedulerHint(String key, String value);
     
     /**
+     * Adds a scheduler hint (array based) used for boot up
+     * 
+     * @param key the scheduler hint key
+     * @param value the scheduler hint value
+     * @return this builder
+     */
+    ServerCreateBuilder addSchedulerHint(String key, List<String> value);
+    
+    /**
      * Adds/Replaces scheduler hints used for bootup
      * 
      * @param schedulerHints map of key and value scheduler hints
      * @return this builder
      */
-    ServerCreateBuilder addSchedulerHints(Map<String, String> schedulerHints);
+    ServerCreateBuilder addSchedulerHints(Map<String, Object> schedulerHints);
 
     /**
      * Associates this Server with a public keypair name
@@ -131,5 +140,23 @@ public interface ServerCreateBuilder extends Buildable.Builder<ServerCreateBuild
      * @return this userdata
      */
     ServerCreateBuilder userData(String userData);
+    
+    /**
+     * Add admin password for launching the server.
+     *
+     * @param password the password
+     * @return this builder
+     */
+    
+    ServerCreateBuilder addAdminPass(String adminPass);
+	
+	/**
+     * Sets the config drive parameter.
+     *
+     * @param configDrive the configDrive value
+     * @return this builder
+     */
+    
+    ServerCreateBuilder configDrive(boolean configDrive);
 
 }

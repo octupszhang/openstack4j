@@ -3,13 +3,14 @@ package org.openstack4j.openstack.networking.domain.ext;
 import java.util.List;
 
 import org.openstack4j.model.network.ext.HealthMonitor;
+import org.openstack4j.model.network.ext.HealthMonitorType;
 import org.openstack4j.model.network.ext.builder.HealthMonitorBuilder;
 import org.openstack4j.openstack.common.ListResult;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  * A health monitor entity
@@ -25,20 +26,15 @@ public class NeutronHealthMonitor implements HealthMonitor {
 	@JsonProperty("tenant_id")
 	private String tenantId;
 
-	/**
-	 * The type of probe sent by the load balancer to verify the member state, which is PING, TCP, HTTP, or HTTPS.
-	 */
-	private String type;
-	
+	private HealthMonitorType type;
 	private Integer delay;
-	
 	private Integer timeout;
 	/**
 	 * Number of allowed connection failures before changing the status of the member to INACTIVE. A valid value is from 1 to 10.
 	 */
 	@JsonProperty("max_retries")
 	private Integer maxRetries;
-	
+
 	/**
 	 * The HTTP method that the monitor uses for requests.
 	 */
@@ -55,7 +51,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 	 */
 	@JsonProperty("expected_codes")
 	private String expectedCodes  ;
-	
+
 	/**
 	 * The administrative state of the health monitor, which is up (true) or down (false)
 	 */
@@ -102,7 +98,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getType() {
+	public HealthMonitorType getType() {
 		return type;
 	}
 
@@ -181,11 +177,11 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 		@Override
 		public String toString() {
-			return Objects.toStringHelper(this).omitNullValues()
+			return MoreObjects.toStringHelper(this).omitNullValues()
 					.add("healthMonitors", healthMonitors).toString();
 		}
 	}
-	public static class HealthMonitorConcretebuilder implements HealthMonitorBuilder{
+	public static class HealthMonitorConcretebuilder implements HealthMonitorBuilder {
 		NeutronHealthMonitor m;
 		@Override
 		public HealthMonitor build() {
@@ -204,7 +200,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -214,17 +210,17 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
-		public HealthMonitorBuilder type(String type) {
+		public HealthMonitorBuilder type(HealthMonitorType type) {
 			m.type = type;
 			return this;
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -234,7 +230,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -244,7 +240,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -254,7 +250,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -264,7 +260,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 		}
 
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -273,7 +269,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 			return this;
 		}
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -282,7 +278,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 			return this;
 		}
 		/**
-		 * 
+		 *
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -293,7 +289,7 @@ public class NeutronHealthMonitor implements HealthMonitor {
 	}
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).omitNullValues()
+		return MoreObjects.toStringHelper(this).omitNullValues()
 				.add("id",id)
 				.add("adminStateUp",adminStateUp)
 				.add("delay",delay)
@@ -306,6 +302,6 @@ public class NeutronHealthMonitor implements HealthMonitor {
 				.add("type",type)
 				.add("urlPath",urlPath)
 				.toString();
-	} 
-	
+	}
+
 }

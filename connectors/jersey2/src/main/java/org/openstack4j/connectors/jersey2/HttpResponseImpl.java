@@ -1,17 +1,20 @@
 package org.openstack4j.connectors.jersey2;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.openstack4j.core.transport.ClientConstants;
 import org.openstack4j.core.transport.ExecutionOptions;
 import org.openstack4j.core.transport.HttpEntityHandler;
 import org.openstack4j.core.transport.HttpResponse;
 
 public class HttpResponseImpl implements HttpResponse {
-    private Response response;
+
+    private final Response response;
 
     private HttpResponseImpl(Response response) {
         this.response = response;
@@ -57,7 +60,7 @@ public class HttpResponseImpl implements HttpResponse {
      */
     @Override
     public <T> T getEntity(Class<T> returnType, ExecutionOptions<T> options) {
-       return HttpEntityHandler.handle(this, returnType, options);
+        return HttpEntityHandler.handle(this, returnType, options);
     }
 
     /**
@@ -76,7 +79,7 @@ public class HttpResponseImpl implements HttpResponse {
     public String getStatusMessage() {
         return response.getStatusInfo().getReasonPhrase();
     }
-    
+
     /**
      * @return the input stream
      */
@@ -108,5 +111,15 @@ public class HttpResponseImpl implements HttpResponse {
     @Override
     public <T> T readEntity(Class<T> typeToReadAs) {
         return response.readEntity(typeToReadAs);
+    }
+
+    @Override
+    public void close() throws IOException {
+        // Jersey handles this automatically in all cases - no-op
+    }
+    
+    @Override
+    public String getContentType() {
+        return header(ClientConstants.HEADER_CONTENT_TYPE);
     }
 }
